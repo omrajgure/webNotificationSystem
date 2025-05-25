@@ -1,0 +1,170 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FCM Token Generator</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-messaging-compat.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      background: #ffffff;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      max-width: 400px;
+      width: 90%;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      color: #333;
+      font-size: 24px;
+    }
+
+    p {
+      margin-bottom: 30px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    button {
+      padding: 12px 25px;
+      font-size: 16px;
+      color: #fff;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+    .toast {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    background: #323232;
+    color: #fff;
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    z-index: 9999;
+    max-width: 300px;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .toast strong {
+    font-size: 16px;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .toast p {
+    font-size: 14px;
+    margin: 0;
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Subscribe to Notifications</h2>
+    <p>Click the button below to receive updates.</p>
+    <button onclick="getToken()">Subscribe</button>
+  </div>
+  <div id="toast" class="toast hidden">
+    <strong id="toast-title">Notification</strong>
+    <p id="toast-body">This is the body</p>
+  </div>
+  
+
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrc0SUbStdZlqk6Gb2X2UzVU0aRjhPU54",
+      authDomain: "webnotificationsystem.firebaseapp.com",
+      projectId: "webnotificationsystem",
+      storageBucket: "webnotificationsystem.firebasestorage.app",
+      messagingSenderId: "593356455427",
+      appId: "1:593356455427:web:88163ce5ec0356d48a1836",
+      measurementId: "G-CPVG2BNCE9"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
+    async function getToken() {
+      const subscribeBtn = document.querySelector("button");
+      try {
+        const currentToken = await messaging.getToken({
+          vapidKey: "BAei3Brp-Gp9eBK0-0BQmBECzmwQHTWcu8snZ0ZMey8Kj1KB9lhwFa9QbxS8W3dtd--mppM94OmENbTEHxdx9Vc"
+        });
+
+        if (currentToken) {
+
+          console.log("Token:", currentToken);
+          await fetch("http://localhost:8000/devices/register", {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ fcm_token: currentToken })
+            });
+
+            console.log("📨 Token sent to backend successfully.");
+            subscribeBtn.disabled = true;
+            subscribeBtn.textContent = "Subscribed \u2705";
+            subscribeBtn.style.backgroundColor = "#28a745";
+        } else {
+          console.warn("⚠️ No registration token available. Request permission to generate one.");
+        }
+      } catch (err) {
+        console.error("An error occurred while retrieving token:", err);
+      }
+    }
+
+    navigator.serviceWorker.register('firebase-messaging-sw.js')
+  .then((registration) => {
+    console.log('Service Worker registered successfully:', registration);
+  })
+  .catch((err) => {
+    console.error('Service Worker registration failed:', err);
+  });
+
+
+    messaging.onMessage((payload) => {
+      console.log('Foreground message received:', payload);
+      const { title, body } = payload.notification || {};
+      document.getElementById('toast-title').textContent = title;
+      document.getElementById('toast-body').textContent = body;
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 5000);
+    });
+  </script>
+</body>
+</html>
