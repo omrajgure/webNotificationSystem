@@ -2,3 +2,4 @@
 venv/
 .venv/
 backend/app/config/serviceAccountKey.json
+firebase_config.js
