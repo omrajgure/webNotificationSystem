@@ -1,5 +1,5 @@
 # Virtual environment
 venv/
 .venv/
-backend/app/config/serviceAccountKey.json
-firebase_config.js
+# backend/app/config/serviceAccountKey.json
+# firebase_config.js
