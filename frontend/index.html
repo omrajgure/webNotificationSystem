@@ -125,7 +125,7 @@
         if (currentToken) {
 
           console.log("Token:", currentToken);
-          await fetch("http://localhost:8000/devices/register", {
+          await fetch("https://webnotificationsystem.onrender.com/devices/register", {
                 method: "POST",
                 headers: {
                 "Content-Type": "application/json"
